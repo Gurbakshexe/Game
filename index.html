@@ -1,8 +1,10 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <!doctype html>
-<html lang="en"><head>
+<html lang="en">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0d1c">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}[hidden]{display:none!important}img{max-width:100%}</style>
 <title>Moth Light</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,9 +16,6 @@
     --font-display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
     --font-mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
     color-scheme: dark;
-    box-sizing: border-box;
-    padding-top: env(safe-area-inset-top, 0px);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
   html { scroll-padding-top: env(safe-area-inset-top, 0px); }
   html, body { background: var(--night); }
@@ -82,6 +81,9 @@
 </style>
 </head>
 <body>
+
+
+
 <div class="wrap">
   <header>
     <h1>Moth Light</h1>
@@ -112,10 +114,11 @@
           <button id="startAll" type="button" hidden>Start for everyone</button>
           <button id="leave" type="button" class="ghost" hidden>Leave room</button>
         </div>
+        <p id="mpNote" hidden>Multiplayer isn’t available in this view. Solo play still works.</p>
         <div id="mp" hidden>
           <div class="row"><label for="nick">Your name</label><input id="nick" maxlength="14" autocomplete="off" placeholder="Moth"></div>
           <div class="row"><label for="codeIn">Room code</label><input id="codeIn" maxlength="8" autocomplete="off" placeholder="e.g. glow7"><button id="joinBtn" type="button">Join</button><button id="makeBtn" type="button" class="ghost">New room</button></div>
-          <p>Friends need this page shared with them, then they enter the same code.</p>
+          <p>Send your friends the link to this page, then everyone enters the same code. Up to 4 moths per room.</p>
         </div>
         <div id="lobby" hidden>
           <div class="row"><label>Room code</label><span id="code"></span></div>
@@ -181,9 +184,13 @@
     return n || 'Moth';
   }
   function pnum(v, d) { return typeof v === 'number' && isFinite(v) ? v : d; }
-  function others() {
+  // Only people count as players; the publishing Claude session can show up as an "agent" peer.
+  function everyone() {
     if (!room) return [];
-    return room.peers().filter(function (q) { return !q.isMe; });
+    return room.peers().filter(function (q) { return q.kind === 'viewer'; });
+  }
+  function others() {
+    return everyone().filter(function (q) { return !q.isMe; });
   }
   function push(extra) {
     if (!room) return;
@@ -196,7 +203,7 @@
   function renderLobby() {
     elPlist.textContent = '';
     if (!room) return;
-    var all = room.peers();
+    var all = everyone();
     all.forEach(function (q) {
       var li = document.createElement('li'), a = document.createElement('span'), b = document.createElement('span');
       var nm = String((q.presence && q.presence.n) || 'Moth').slice(0, 14);
@@ -238,16 +245,16 @@
   function onPeers() {
     renderLobby();
     checkDown();
-    var all = room ? room.peers() : [];
+    var all = others();
     for (var i = 0; i < all.length; i++) {
       var q = all[i];
-      if (q.isMe || !q.presence) continue;
-      var sr = q.presence.sr;
-      if (sr === undefined) continue;
+      // Record every teammate's start counter the first time we see them (0 if they have not started yet),
+      // so their first "Start for everyone" counts as a change instead of being taken as the baseline.
+      var sr = pnum(q.presence && q.presence.sr, 0);
       if (startSeen[q.peer] === undefined) { startSeen[q.peer] = sr; continue; }
       if (startSeen[q.peer] !== sr) {
         startSeen[q.peer] = sr;
-        if (Date.now() - joinedAt > 2500 && state !== 'play') start();
+        if (Date.now() - joinedAt > 3000 && state !== 'play') start();
       }
     }
   }
@@ -281,8 +288,12 @@
         if (n >= 4) { leaveRoom(); ovText.textContent = 'That room is full (4 players max). Try another code.'; }
       };
       setTimeout(checkFull, 1800); setTimeout(checkFull, 3500);
-    }).catch(function () {
-      ovText.textContent = 'Couldn’t join that room. Everyone needs to be signed in to claude.ai with access to this page.';
+    }).catch(function (err) {
+      var code = err && err.code;
+      ovText.textContent = code === 'room_full' ? 'That room is full (4 players max). Try another code.'
+        : code === 'limit_reached' ? 'Couldn’t open that room right now. Try again in a moment.'
+        : roomMode === 'standalone' ? 'Couldn’t reach the game server. Check your connection and try again.'
+        : 'Couldn’t join that room. Everyone needs to be signed in to claude.ai with access to this page.';
     }).then(function () { joinBtn.disabled = makeBtn.disabled = false; });
   }
 
@@ -310,11 +321,126 @@
     push({ sr: v });
   });
 
+  // ---------- standalone transport (Vercel) ----------
+  // Same interface as the claude.ai room: join(name) -> { peers, onPeers, presence, leave }.
+  // Each tab posts its presence to /api/room and gets everyone else's back; Redis holds the state.
+  function standaloneRoot() {
+    var API = '/api/room';
+    function rid() { var s = ''; while (s.length < 18) s += Math.random().toString(36).slice(2); return s.slice(0, 18); }
+    function post(body) {
+      return fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+        .then(function (r) {
+          return r.json().catch(function () { return {}; }).then(function (j) { return { ok: r.ok, j: j || {} }; });
+        });
+    }
+    function same(a, b) { return JSON.stringify(a === null ? undefined : a) === JSON.stringify(b); }
+
+    return {
+      join: function (name) {
+        var code = String(name).replace(/^moth-/, ''), id = rid();
+        var mine = {}, others = [], handlers = [], alive = true, timer = null, busy = false, again = false, lastKey = null, lastSend = 0, left = false;
+
+        function me() { return { peer: id, by: null, isMe: true, sameTab: true, kind: 'viewer', guest: false, presence: mine, updatedAt: Date.now() }; }
+        function snapshot() { return [me()].concat(others); }
+        function emitPeers() {
+          var snap = snapshot();
+          handlers.slice().forEach(function (h) { try { h({ peers: snap, joined: [], left: [], updated: [] }); } catch (e) {} });
+        }
+        function absorb(list) {
+          var now = Date.now();
+          others = list.map(function (o) {
+            return { peer: String(o.id), by: null, isMe: false, sameTab: false, kind: 'viewer', guest: false,
+                     presence: (o.p && typeof o.p === 'object') ? o.p : {}, updatedAt: now - (Number(o.age) || 0) };
+          });
+          var key = JSON.stringify(others.map(function (o) { return [o.peer, o.presence]; }));
+          if (key !== lastKey) { lastKey = key; emitPeers(); }
+        }
+        function playing() {
+          return mine.st === 'play' || mine.st === 'down' || others.some(function (o) { return o.presence.st === 'play' || o.presence.st === 'down'; });
+        }
+        // Fast while anyone is flying, slower in the lobby, slowest when alone, so idle tabs stay cheap.
+        function delay() { return playing() ? 200 : (others.length ? 1000 : 2000); }
+        function schedule(ms) { if (!alive) return; clearTimeout(timer); timer = setTimeout(tick, ms); }
+        function sync() {
+          busy = true; lastSend = Date.now(); left = false;
+          return post({ op: 'sync', room: code, id: id, p: mine }).then(function (res) {
+            busy = false;
+            if (!res.ok) { var e = new Error('sync failed'); e.code = 'upstream_error'; throw e; }
+            if (res.j.full) { var f = new Error('room full'); f.code = 'room_full'; throw f; }
+            absorb(res.j.peers || []);
+          }, function (err) { busy = false; throw err; });
+        }
+        function tick() {
+          if (!alive) return;
+          if (busy) { again = true; return; }
+          sync().catch(function () {}).then(function () {
+            if (!alive) return;
+            if (again) { again = false; schedule(60); } else schedule(delay());
+          });
+        }
+        function bye() {
+          if (left) return;
+          left = true;
+          var body = JSON.stringify({ op: 'leave', room: code, id: id });
+          try { if (navigator.sendBeacon && navigator.sendBeacon(API, new Blob([body], { type: 'application/json' }))) return; } catch (e) {}
+          try { fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body, keepalive: true }); } catch (e) {}
+        }
+
+        var api = {
+          name: name,
+          peers: snapshot,
+          onPeers: function (fn) {
+            handlers.push(fn);
+            Promise.resolve().then(function () {
+              if (handlers.indexOf(fn) >= 0) { var s = snapshot(); fn({ peers: s, joined: s, left: [], updated: [] }); }
+            });
+            return function () { var i = handlers.indexOf(fn); if (i >= 0) handlers.splice(i, 1); };
+          },
+          presence: function (patch) {
+            // Position rides the regular ticks; a change of state, name, start counter or revive progress goes out at once.
+            var urgent = ['st', 'sr', 'jt', 'n'].some(function (k) { return k in patch && patch[k] !== mine[k]; }) ||
+                         ('rp' in patch && !same(patch.rp, mine.rp));
+            var n = {}, k;
+            for (k in mine) n[k] = mine[k];
+            for (k in patch) { if (patch[k] === null) delete n[k]; else n[k] = patch[k]; }
+            mine = n;
+            if (urgent) { emitPeers(); schedule(Math.max(30, 80 - (Date.now() - lastSend))); }
+            return Promise.resolve();
+          },
+          leave: function () {
+            if (!alive) return Promise.resolve();
+            alive = false; clearTimeout(timer);
+            window.removeEventListener('pagehide', bye);
+            bye();
+            return Promise.resolve();
+          }
+        };
+
+        return sync().then(function () {
+          window.addEventListener('pagehide', bye);
+          schedule(delay());
+          return api;
+        });
+      }
+    };
+  }
+
+  // Rooms come from claude.ai when the page runs there; anywhere else (Vercel) from /api/room.
+  var roomMode = '', mpNote = $('mpNote');
+  function useStandalone() {
+    if (!window.fetch) { mpNote.hidden = false; return; }
+    fetch('/api/room', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ op: 'ping' }) })
+      .then(function (r) { return r.json().then(function (j) { return r.ok && j && j.ok; }); })
+      .then(function (ok) {
+        if (ok) { roomRoot = standaloneRoot(); roomMode = 'standalone'; showMenu(); } else mpNote.hidden = false;
+      })
+      .catch(function () { mpNote.hidden = false; });
+  }
   try {
     if (window.claude && claude.use) {
-      claude.use('room').then(function (r) { if (r) { roomRoot = r; showMenu(); } }, function () {});
-    }
-  } catch (e) {}
+      claude.use('room').then(function (r) { if (r) { roomRoot = r; roomMode = 'claude'; showMenu(); } else useStandalone(); }, useStandalone);
+    } else useStandalone();
+  } catch (e) { useStandalone(); }
 
   // ---------- leaderboard (shared db: one row per player, best pollen) ----------
   var db = null, uid = null, myDbBest = 0, lbUnsub = null, lbRows = [];
@@ -761,7 +887,7 @@
   function renderBoard() {
     elBoard.textContent = '';
     if (!room) return;
-    var rows = room.peers().map(function (q) {
+    var rows = everyone().map(function (q) {
       var pr = q.presence || {};
       return { me: q.isMe, n: String(pr.n || 'Moth').slice(0, 14), h: clamp(Math.round(pnum(pr.h, 200)), 0, 360), lv: pnum(pr.lv, 1), pl: q.isMe ? pollen : pnum(pr.pl, 0), st: pr.st };
     });
@@ -819,6 +945,6 @@
   requestAnimationFrame(frame);
 })();
 </script>
-</body></html>
 
-</body></html>
+</body>
+</html>
