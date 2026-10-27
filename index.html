@@ -1,94 +1,143 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Free the Moth</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Moth Light</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=DM+Mono:wght@400;500&display=swap">
 <style>
-  /* Layout: one centered play field under a slim header; HUD sits between title and field. Single night-time look by choice. */
   :root {
-    --night: #0b0d1c;
-    --ink: #e9e6f5;
-    --dim: #8c8aa8;
-    --lamp: #ffcf6e;
-    --bat: #ff5a6e;
-    --panel: #14172c;
-    --line: #262a47;
+    --night: #0b0d1c; --ink: #e9e6f5; --dim: #8c8aa8; --lamp: #ffcf6e; --bat: #ff5a6e;
+    --panel: #14172c; --line: #262a47;
     --font-display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
     --font-mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
     color-scheme: dark;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
   html, body { background: var(--night); }
-  body {
-    margin: 0;
-    color: var(--ink);
-    font-family: var(--font-mono);
-    font-size: 14px;
-    line-height: 1.5;
-    padding-block: 20px 32px;
-    padding-left: max(16px, env(safe-area-inset-left, 0px));
-    padding-right: max(16px, env(safe-area-inset-right, 0px));
-  }
+  body { margin: 0; color: var(--ink); font: 14px/1.5 var(--font-mono); padding: 20px max(16px, env(safe-area-inset-right, 0px)) 32px max(16px, env(safe-area-inset-left, 0px)); }
   .wrap { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
   header { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px 24px; flex-wrap: wrap; }
-  .eyebrow { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dim); margin: 0 0 4px; }
-  h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(32px, 7vw, 52px); line-height: 1; margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
-  h1 span { color: var(--lamp); }
+  h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(32px, 7vw, 52px); line-height: 1; margin: 0; letter-spacing: -0.02em; }
   .stats { display: flex; gap: 22px; }
-  .stat { display: flex; flex-direction: column; min-width: 0; }
+  .stat { display: flex; flex-direction: column; }
   .stat b { font-family: var(--font-display); font-size: 28px; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
-  .stat small { font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); }
-  .meter { height: 8px; background: var(--panel); border: 1px solid var(--line); border-radius: 99px; overflow: hidden; }
-  .meter i { display: block; height: 100%; width: 100%; background: var(--lamp); border-radius: 99px; transition: background 0.2s; }
+  .stat small { font-size: 12px; color: var(--dim); }
+  .meter-row { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--dim); }
+  .meter { flex: 1; height: 8px; background: var(--panel); border: 1px solid var(--line); border-radius: 99px; overflow: hidden; }
+  .meter i { display: block; height: 100%; width: 100%; background: var(--lamp); border-radius: 99px; transition: background .2s; }
   .meter.low i { background: var(--bat); }
-  .meter-row { display: flex; align-items: center; gap: 12px; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); }
-  .meter-row .meter { flex: 1; }
+  .meter.nitro i { background: #6ec8ff; }
+  .meter.cool i { background: var(--dim); }
+  .meter.mag i { background: #c58bff; }
+  .meter.lvl i { background: #6ee79a; }
+  .meter.rev i { background: #ff9aa8; }
+  .meter-row[hidden] { display: none; }
+  .dot.rainbow { background: conic-gradient(#ff5a6e, #ffcf6e, #6ee79a, #6ec8ff, #c58bff, #ff5a6e); }
+  .meter-row button { padding: 4px 10px; font-size: 12px; }
+  .board { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12px; color: var(--dim); }
+  .board[hidden] { display: none; }
+  .board li { display: inline-flex; align-items: center; gap: 6px; }
+  .board li.me { color: var(--ink); }
+  #lbList { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; width: 100%; counter-reset: r; }
+  #lbList li { display: flex; align-items: baseline; gap: 10px; font-size: 14px; counter-increment: r; }
+  #lbList li::before { content: counter(r); width: 1.6em; color: var(--dim); font-variant-numeric: tabular-nums; }
+  #lbList li.me { color: var(--lamp); }
+  #lbList .nm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #lbList .lv { color: var(--dim); font-size: 12px; }
+  #lbList .sc { font-family: var(--font-display); font-weight: 800; font-variant-numeric: tabular-nums; }
   .field { position: relative; width: 100%; aspect-ratio: 800 / 520; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; background: #070815; }
   canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: none; }
-  .overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(7, 8, 21, 0.78); }
+  .overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(7, 8, 21, .86); overflow-y: auto; }
   .overlay[hidden] { display: none; }
-  .card { max-width: 380px; display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
-  .card h2 { font-family: var(--font-display); font-weight: 800; font-size: clamp(26px, 6vw, 36px); line-height: 1.05; margin: 0; text-wrap: balance; }
+  .card { max-width: 420px; width: 100%; display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
+  .card h2 { font-family: var(--font-display); font-weight: 800; font-size: clamp(24px, 5.5vw, 34px); line-height: 1.05; margin: 0; }
   .card p { margin: 0; color: var(--dim); }
   .card p strong { color: var(--ink); font-weight: 500; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; width: 100%; }
+  .row[hidden], #mp[hidden], #lobby[hidden], button[hidden] { display: none; }
+  #mp, #lobby { display: flex; flex-direction: column; gap: 8px; width: 100%; padding-top: 10px; border-top: 1px solid var(--line); }
+  #mp[hidden], #lobby[hidden] { display: none; }
+  input { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 8px 10px; min-width: 0; width: 9em; }
+  input:focus-visible { outline: 2px solid var(--lamp); outline-offset: 1px; }
+  label { font-size: 12px; color: var(--dim); }
   button { font: inherit; font-weight: 500; color: #2a1c00; background: var(--lamp); border: 0; border-radius: 4px; padding: 10px 18px; cursor: pointer; }
+  button.ghost { background: transparent; color: var(--ink); border: 1px solid var(--line); }
   button:hover { filter: brightness(1.08); }
   button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+  #code { font-family: var(--font-display); font-size: 26px; letter-spacing: .12em; color: var(--lamp); }
+  #plist { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px; width: 100%; }
+  #plist li { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; }
+  #plist span:last-child { color: var(--dim); }
   .legend { display: flex; flex-wrap: wrap; gap: 6px 22px; color: var(--dim); font-size: 12px; margin: 0; }
   .legend span { display: inline-flex; align-items: center; gap: 8px; }
   .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
   .dot.pollen { background: var(--lamp); box-shadow: 0 0 8px var(--lamp); }
   .dot.bat { background: var(--bat); }
 </style>
-
+</head>
+<body>
 <div class="wrap">
   <header>
-    <div>
-      <p class="eyebrow">A small night game</p>
-      <h1>Moth <span>Light</span></h1>
-    </div>
+    <h1>Moth Light</h1>
+    <button id="lbBtn" type="button" class="ghost">Leaderboard</button>
     <div class="stats">
+      <div class="stat"><b id="level">1</b><small>Level</small></div>
+      <div class="stat"><b id="wave">0</b><small>Wave</small></div>
       <div class="stat"><b id="score">0</b><small>Pollen</small></div>
-      <div class="stat"><b id="time">0.0</b><small>Seconds</small></div>
       <div class="stat"><b id="best">0</b><small>Best</small></div>
     </div>
   </header>
 
-  <div class="meter-row">Lantern <div class="meter" id="meter"><i id="meterFill"></i></div></div>
+  <div class="meter-row" hidden>Lantern <div class="meter" id="meter"><i id="meterFill"></i></div></div>
+  <div class="meter-row">Level <div class="meter lvl"><i id="lvlFill" style="width:0%"></i></div><span id="lvlText">0/8</span></div>
+  <div class="meter-row">Nitro <div class="meter nitro" id="nitroMeter"><i id="nitroFill"></i></div><button id="nitroBtn" type="button">Boost (E)</button></div>
+  <div class="meter-row">Magnet <div class="meter mag" id="magMeter"><i id="magFill" style="width:0%"></i></div><button id="magBtn" type="button">Magnet ×0 (1)</button></div>
+  <div class="meter-row" id="revRow" hidden>Revive <div class="meter rev"><i id="revFill" style="width:0%"></i></div><span id="revText">0/10</span></div>
+  <ol class="board" id="board" hidden aria-label="Players in this room"></ol>
 
   <div class="field">
     <canvas id="game" width="800" height="520" aria-label="Moth Light game field"></canvas>
     <div class="overlay" id="overlay">
       <div class="card">
         <h2 id="ovTitle">Keep the lantern lit.</h2>
-        <p id="ovText">Your light fades every second. Fly into <strong>pollen</strong> to refill it. Bats hunt in the dark, and you only see them when they are inside your glow.</p>
-        <button id="go" type="button">Take off</button>
+        <p id="ovText">Your light fades every second. Fly into <strong>pollen</strong> to refill it. Every 8 pollen is a new <strong>level</strong>, and each level brings faster, nastier bats. Press <strong>E</strong> for a 4 second nitro boost, and grab <strong>rainbow pollen</strong> (+5) for a magnet you use with <strong>1</strong>.</p>
+        <div class="row">
+          <button id="go" type="button">Play solo</button>
+          <button id="startAll" type="button" hidden>Start for everyone</button>
+          <button id="leave" type="button" class="ghost" hidden>Leave room</button>
+        </div>
+        <div id="mp" hidden>
+          <div class="row"><label for="nick">Your name</label><input id="nick" maxlength="14" autocomplete="off" placeholder="Moth"></div>
+          <div class="row"><label for="codeIn">Room code</label><input id="codeIn" maxlength="8" autocomplete="off" placeholder="e.g. glow7"><button id="joinBtn" type="button">Join</button><button id="makeBtn" type="button" class="ghost">New room</button></div>
+          <p>Friends need this page shared with them, then they enter the same code.</p>
+        </div>
+        <div id="lobby" hidden>
+          <div class="row"><label>Room code</label><span id="code"></span></div>
+          <ul id="plist"></ul>
+        </div>
+      </div>
+    </div>
+    <div class="overlay" id="lbPanel" hidden>
+      <div class="card">
+        <h2>Highest pollen</h2>
+        <p id="lbMsg">Loading…</p>
+        <ol id="lbList"></ol>
+        <button id="lbClose" type="button">Close</button>
       </div>
     </div>
   </div>
 
   <p class="legend">
-    <span><i class="dot pollen"></i> Pollen refills light</span>
+    <span><i class="dot pollen"></i> Pollen refills your lantern</span>
+    <span>Press E for nitro</span>
+    <span>Teammate down? Collect 10 rainbow pollen to revive them</span>
+    <span><i class="dot rainbow"></i> Rainbow pollen: +5 and a magnet (press 1)</span>
     <span><i class="dot bat"></i> Red eyes mean bats</span>
     <span>Move: mouse, touch, arrows or WASD</span>
   </p>
@@ -96,61 +145,278 @@
 
 <script>
 (function () {
-  var W = 800, H = 520;
-  var cv = document.getElementById('game');
-  var ctx = cv.getContext('2d');
-  var dark = document.createElement('canvas');
-  dark.width = W; dark.height = H;
+  var W = 800, H = 520, PER_LEVEL = 8, MAX_LEVEL = 12;
+  var cv = document.getElementById('game'), ctx = cv.getContext('2d');
+  var dark = document.createElement('canvas'); dark.width = W; dark.height = H;
   var dctx = dark.getContext('2d');
-
-  var elScore = document.getElementById('score');
-  var elTime = document.getElementById('time');
-  var elBest = document.getElementById('best');
-  var elMeter = document.getElementById('meter');
-  var elFill = document.getElementById('meterFill');
-  var overlay = document.getElementById('overlay');
-  var ovTitle = document.getElementById('ovTitle');
-  var ovText = document.getElementById('ovText');
-  var goBtn = document.getElementById('go');
+  var $ = function (id) { return document.getElementById(id); };
+  var elLevel = $('level'), elScore = $('score'), elBest = $('best'), elMeter = $('meter'), elFill = $('meterFill'),
+      elNitro = $('nitroFill'), nitroBtn = $('nitroBtn'), elMag = $('magFill'), magBtn = $('magBtn'),
+      elLvlFill = $('lvlFill'), elLvlText = $('lvlText'), elBoard = $('board'), elWave = $('wave');
+  var overlay = $('overlay'), ovTitle = $('ovTitle'), ovText = $('ovText'), goBtn = $('go'),
+      startAllBtn = $('startAll'), leaveBtn = $('leave'), mpBox = $('mp'), lobbyBox = $('lobby'),
+      nickIn = $('nick'), codeIn = $('codeIn'), joinBtn = $('joinBtn'), makeBtn = $('makeBtn'),
+      elCode = $('code'), elPlist = $('plist');
 
   var best = 0;
   try { best = parseInt(localStorage.getItem('mothlight-best') || '0', 10) || 0; } catch (e) {}
   elBest.textContent = best;
+  try { nickIn.value = localStorage.getItem('mothlight-nick') || ''; } catch (e) {}
 
-  var state = 'ready';
-  var p, target, orbs, bats, glow, pollen, elapsed, spawnOrb, spawnBat, flash, stars, pointerSeen;
-  var keys = {};
-
-  stars = [];
+  var state = 'ready', keys = {}, last = performance.now();
+  var p, target, orbs, bats, glow, pollen, elapsed, spawnOrb, spawnBat, flash, boost, cool, magnet, magnets, level, banner, bannerText, waves, revCnt, revTarget, revId, reviveN;
+  var stars = [];
   for (var i = 0; i < 70; i++) stars.push({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 1.2 + 0.3, a: Math.random() * 0.4 + 0.1 });
+
+  function rand(a, b) { return a + Math.random() * (b - a); }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+  function lvlOf(n) { return Math.min(MAX_LEVEL, 1 + Math.floor(n / PER_LEVEL)); }
+
+  // ---------- multiplayer (named room, presence only) ----------
+  var roomRoot = null, room = null, roomCode = '', myHue = Math.floor(Math.random() * 360);
+  var usedIds = {}, startSeen = {}, joinedAt = 0, lastPres = 0, rp = {}, lastBoard = 0;
+
+  function myNick() {
+    var n = (nickIn.value || '').replace(/[^\w \-]/g, '').trim().slice(0, 14);
+    return n || 'Moth';
+  }
+  function pnum(v, d) { return typeof v === 'number' && isFinite(v) ? v : d; }
+  function others() {
+    if (!room) return [];
+    return room.peers().filter(function (q) { return !q.isMe; });
+  }
+  function push(extra) {
+    if (!room) return;
+    var base = { n: myNick(), h: myHue, st: state, lv: level, pl: pollen };
+    if (state === 'play') { base.x = Math.round(p.x); base.y = Math.round(p.y); }
+    for (var k in extra) base[k] = extra[k];
+    room.presence(base).catch(function () {});
+  }
+
+  function renderLobby() {
+    elPlist.textContent = '';
+    if (!room) return;
+    var all = room.peers();
+    all.forEach(function (q) {
+      var li = document.createElement('li'), a = document.createElement('span'), b = document.createElement('span');
+      var nm = String((q.presence && q.presence.n) || 'Moth').slice(0, 14);
+      a.textContent = nm + (q.isMe ? ' (you)' : '');
+      var st = q.presence && q.presence.st;
+      b.textContent = st === 'play' ? 'flying' : (st === 'down' ? 'down' : (st === 'over' ? 'rested' : 'waiting'));
+      li.appendChild(a); li.appendChild(b); elPlist.appendChild(li);
+    });
+    elCode.textContent = roomCode + ' · ' + all.length + '/4';
+  }
+
+  function myPeer() {
+    if (!room) return null;
+    var a = room.peers();
+    for (var i = 0; i < a.length; i++) if (a[i].sameTab) return a[i].peer;
+    return null;
+  }
+  // Highest revive count any teammate has reported for the moth with this peer label.
+  function revProg(label) {
+    var n = 0;
+    others().forEach(function (q) { var r = q.presence && q.presence.rp; if (r && r.t === label) n = Math.max(n, pnum(r.n, 0)); });
+    return n;
+  }
+  function anyPlaying() {
+    return others().some(function (q) { return q.presence && q.presence.st === 'play'; });
+  }
+  function checkDown() {
+    if (state !== 'down') return;
+    var me = myPeer(), got = null;
+    others().forEach(function (q) {
+      var r = q.presence && q.presence.rp;
+      if (r && me && r.t === me && pnum(r.n, 0) >= 10 && !usedIds[r.id]) got = r;
+    });
+    if (got) { usedIds[got.id] = 1; revive(); return; }
+    reviveN = revProg(me);
+    if (!anyPlaying()) end('all');
+  }
+
+  function onPeers() {
+    renderLobby();
+    checkDown();
+    var all = room ? room.peers() : [];
+    for (var i = 0; i < all.length; i++) {
+      var q = all[i];
+      if (q.isMe || !q.presence) continue;
+      var sr = q.presence.sr;
+      if (sr === undefined) continue;
+      if (startSeen[q.peer] === undefined) { startSeen[q.peer] = sr; continue; }
+      if (startSeen[q.peer] !== sr) {
+        startSeen[q.peer] = sr;
+        if (Date.now() - joinedAt > 2500 && state !== 'play') start();
+      }
+    }
+  }
+
+  function showMenu() {
+    var inRoom = !!room;
+    mpBox.hidden = !roomRoot || inRoom;
+    lobbyBox.hidden = !inRoom;
+    startAllBtn.hidden = !inRoom;
+    leaveBtn.hidden = !inRoom;
+    goBtn.hidden = inRoom;
+    elBoard.hidden = !inRoom;
+    elCode.textContent = roomCode;
+    if (room) renderLobby();
+  }
+
+  function joinRoom(raw) {
+    var c = String(raw || '').toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 8);
+    if (!roomRoot || !c) return;
+    try { localStorage.setItem('mothlight-nick', nickIn.value); } catch (e) {}
+    joinBtn.disabled = makeBtn.disabled = true;
+    roomRoot.join('moth-' + c).then(function (r) {
+      room = r; roomCode = c; joinedAt = Date.now(); startSeen = {}; rp = {};
+      room.onPeers(onPeers, function () {});
+      push({ jt: Date.now() });
+      showMenu(); renderLobby();
+      // A room holds 4 moths. A newcomer who finds 4 already there steps back out.
+      var checkFull = function () {
+        if (room !== r) return;
+        var n = others().filter(function (q) { return q.kind === 'viewer' && q.presence && typeof q.presence.jt === 'number'; }).length;
+        if (n >= 4) { leaveRoom(); ovText.textContent = 'That room is full (4 players max). Try another code.'; }
+      };
+      setTimeout(checkFull, 1800); setTimeout(checkFull, 3500);
+    }).catch(function () {
+      ovText.textContent = 'Couldn’t join that room. Everyone needs to be signed in to claude.ai with access to this page.';
+    }).then(function () { joinBtn.disabled = makeBtn.disabled = false; });
+  }
+
+  function leaveRoom() {
+    if (room) { try { room.leave(); } catch (e) {} }
+    room = null; roomCode = ''; rp = {};
+    showMenu();
+  }
+
+  joinBtn.addEventListener('click', function () { joinRoom(codeIn.value); });
+  makeBtn.addEventListener('click', function () {
+    var chars = 'abcdefghjkmnpqrstuvwxyz23456789', c = '';
+    for (var i = 0; i < 5; i++) c += chars.charAt(Math.floor(Math.random() * chars.length));
+    codeIn.value = c; joinRoom(c);
+  });
+  codeIn.addEventListener('keydown', function (e) { if (e.key === 'Enter') joinRoom(codeIn.value); });
+  nickIn.addEventListener('change', function () {
+    try { localStorage.setItem('mothlight-nick', nickIn.value); } catch (e) {}
+    push({});
+  });
+  leaveBtn.addEventListener('click', leaveRoom);
+  startAllBtn.addEventListener('click', function () {
+    var v = Date.now();
+    start();
+    push({ sr: v });
+  });
+
+  try {
+    if (window.claude && claude.use) {
+      claude.use('room').then(function (r) { if (r) { roomRoot = r; showMenu(); } }, function () {});
+    }
+  } catch (e) {}
+
+  // ---------- leaderboard (shared db: one row per player, best pollen) ----------
+  var db = null, uid = null, myDbBest = 0, lbUnsub = null, lbRows = [];
+  var lbPanel = $('lbPanel'), lbMsg = $('lbMsg'), lbList = $('lbList');
+  var dbInit = Promise.resolve();
+  try {
+    if (window.claude && claude.use) {
+      dbInit = Promise.all([claude.use('db'), claude.use('user')]).then(function (r) {
+        if (!r[0] || !r[1]) return;
+        return r[1].id().then(function (id) {
+          if (!id) return;
+          db = r[0]; uid = id;
+          return db.doc('scores/' + uid).get().then(function (s) {
+            var d = s.exists ? s.data() : null;
+            myDbBest = d && typeof d.s === 'number' ? d.s : 0;
+            if (best > myDbBest) saveScore(best, 1);
+          });
+        });
+      }).catch(function () { db = null; });
+    }
+  } catch (e) {}
+
+  function saveScore(score, lv) {
+    if (!db || !uid) return;
+    myDbBest = score;
+    db.doc('scores/' + uid).set({ s: score, n: myNick(), lv: lv, t: Date.now() }).catch(function () {});
+  }
+
+  function renderLb() {
+    lbList.textContent = '';
+    lbMsg.textContent = lbRows.length ? '' : 'No scores yet. Be the first.';
+    lbRows.forEach(function (r) {
+      var li = document.createElement('li'), a = document.createElement('span'), b = document.createElement('span'), c = document.createElement('span');
+      a.className = 'nm'; a.textContent = r.n + (r.id === uid ? ' (you)' : '');
+      b.className = 'lv'; b.textContent = 'Lv ' + r.lv;
+      c.className = 'sc'; c.textContent = r.s;
+      if (r.id === uid) li.className = 'me';
+      li.appendChild(a); li.appendChild(b); li.appendChild(c); lbList.appendChild(li);
+    });
+  }
+
+  function openLb() {
+    lbPanel.hidden = false; lbList.textContent = ''; lbMsg.textContent = 'Loading…';
+    $('lbClose').focus();
+    dbInit.then(function () {
+      if (!db) { lbMsg.textContent = 'The leaderboard isn’t available here. It needs you to be signed in to claude.ai with access to this page.'; return; }
+      if (lbUnsub) { renderLb(); return; }
+      lbUnsub = db.collection('scores').orderBy('s', 'desc').limit(10).onSnapshot(function (snap) {
+        lbRows = snap.docs.map(function (d) {
+          var x = d.data() || {};
+          return { id: d.id, s: pnum(x.s, 0), n: String(x.n || 'Moth').slice(0, 14), lv: pnum(x.lv, 1) };
+        });
+        renderLb();
+      }, function () { lbUnsub = null; lbMsg.textContent = 'Couldn’t load the leaderboard.'; });
+    });
+  }
+  function closeLb() { lbPanel.hidden = true; $('lbBtn').focus(); }
+  $('lbBtn').addEventListener('click', openLb);
+  $('lbClose').addEventListener('click', closeLb);
+  window.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !lbPanel.hidden) closeLb(); });
+
+  // ---------- game ----------
+  // Nitro: 4 seconds of +20% speed, then 10 seconds to recharge.
+  function useBoost() {
+    if (state === 'play' && boost <= 0 && cool <= 0) boost = 4;
+  }
+
+  // Magnet: earned from rainbow pollen, pulls nearby pollen in for 6 seconds.
+  function useMagnet() {
+    if (state === 'play' && magnets > 0 && magnet <= 0) { magnets -= 1; magnet = 6; }
+  }
 
   function reset() {
     p = { x: W / 2, y: H / 2, vx: 0 };
     target = { x: W / 2, y: H / 2 };
     orbs = []; bats = [];
-    glow = 1; pollen = 0; elapsed = 0; spawnOrb = 0; spawnBat = 2; flash = 0;
+    glow = 1; pollen = 0; elapsed = 0; spawnOrb = 0; spawnBat = 2.5; flash = 0; boost = 0; cool = 0; magnet = 0; magnets = 0;
+    level = 1; banner = 0; bannerText = null; waves = 0; revCnt = 0; revTarget = null; revId = ''; reviveN = 0;
   }
   reset();
 
-  function rand(a, b) { return a + Math.random() * (b - a); }
-
   function addOrb() {
     if (orbs.length >= 6) return;
-    orbs.push({ x: rand(40, W - 40), y: rand(40, H - 40), life: 10, ph: rand(0, 6.28), dx: rand(-12, 12), dy: rand(-12, 12) });
+    orbs.push({ x: rand(40, W - 40), y: rand(40, H - 40), life: Math.max(5, 10 - 0.35 * (level - 1)), ph: rand(0, 6.28), dx: rand(-12, 12), dy: rand(-12, 12), rb: Math.random() < 0.04 });
   }
 
+  // Every level raises bat speed, spawn rate and the share of fast and hunting bats.
   function addBat() {
+    var L = level, r = Math.random();
+    var hunterP = L >= 3 ? Math.min(0.35, 0.07 * (L - 2)) : 0;
+    var dartP = L >= 2 ? Math.min(0.4, 0.1 * (L - 1)) : 0;
+    var type = r < hunterP ? 'hunter' : (r < hunterP + dartP ? 'dart' : 'sine');
     var fromLeft = Math.random() < 0.5;
-    bats.push({
-      x: fromLeft ? -30 : W + 30,
-      y: rand(50, H - 50),
-      base: rand(60, H - 60),
-      dir: fromLeft ? 1 : -1,
-      speed: 90 + Math.min(elapsed, 90) * 2.2 + rand(0, 40),
-      amp: rand(30, 90),
-      freq: rand(1.2, 2.6),
-      ph: rand(0, 6.28)
-    });
+    var b = { type: type, x: fromLeft ? -30 : W + 30, y: rand(50, H - 50), dir: fromLeft ? 1 : -1, ph: rand(0, 6.28), life: 8 };
+    if (type === 'sine') {
+      b.base = rand(60, H - 60); b.speed = 80 + 9 * L + rand(0, 40); b.amp = rand(30, 90); b.freq = rand(1.2, 2.6);
+    } else if (type === 'dart') {
+      b.speed = 240 + 12 * L; b.slope = rand(-40, 40);
+    } else {
+      b.speed = 60 + 6 * L; b.ang = Math.atan2(p.y - b.y, p.x - b.x);
+    }
+    bats.push(b);
   }
 
   function start() {
@@ -159,132 +425,184 @@
     overlay.hidden = true;
     addOrb(); addOrb(); addOrb();
     last = performance.now();
+    banner = 1.6; bannerText = null;
+    push({ rp: null });
+  }
+
+  // In a room, a death only puts you down while a teammate is still flying.
+  function die(reason) {
+    if (room && anyPlaying()) down(); else end(reason);
+  }
+  function down() {
+    state = 'down'; flash = 1; bats = []; orbs = []; keys = {};
+    revCnt = 0; revTarget = null; reviveN = 0;
+    push({ rp: null });
+  }
+  function revive() {
+    state = 'play'; glow = Math.max(glow, 0.7); bats = []; spawnBat = 3; flash = 1;
+    banner = 2; bannerText = 'Revived!';
+    last = performance.now();
+    push({ rp: null });
+  }
+  // Each rainbow pollen a living moth collects counts toward reviving a downed teammate.
+  function waveTick(add) {
+    if (!room) return;
+    var downs = others().filter(function (q) { return q.presence && q.presence.st === 'down'; });
+    if (!downs.length) {
+      if (revTarget) { revTarget = null; revCnt = 0; push({ rp: null }); }
+      return;
+    }
+    var tg = null;
+    for (var i = 0; i < downs.length; i++) if (downs[i].peer === revTarget) tg = downs[i];
+    if (!tg) { tg = downs[0]; revTarget = tg.peer; revCnt = 0; revId = Date.now() + '-' + Math.floor(Math.random() * 1e6); }
+    if (add) revCnt++;
+    push({ rp: { t: revTarget, n: Math.min(10, revCnt), id: revId } });
   }
 
   function end(reason) {
     state = 'over';
     flash = 1;
-    var total = pollen;
-    var isBest = total > best;
+    var isBest = pollen > best;
     if (isBest) {
-      best = total;
-      elBest.textContent = best;
+      best = pollen; elBest.textContent = best;
       try { localStorage.setItem('mothlight-best', String(best)); } catch (e) {}
     }
-    ovTitle.textContent = reason === 'bat' ? 'Caught by a bat.' : 'The lantern went out.';
-    ovText.textContent = 'You gathered ' + total + ' pollen in ' + elapsed.toFixed(1) + ' seconds.' + (isBest && total > 0 ? ' That is a new best.' : '');
+    if (pollen > myDbBest) saveScore(pollen, level);
+    ovTitle.textContent = reason === 'all' ? 'Every moth went dark.' : (reason === 'bat' ? 'Caught by a bat.' : 'The lantern went out.');
+    ovText.textContent = 'You reached level ' + level + ' with ' + pollen + ' pollen in ' + elapsed.toFixed(1) + ' seconds.' + (isBest && pollen > 0 ? ' That’s a new best.' : '');
     goBtn.textContent = 'Fly again';
+    showMenu();
     overlay.hidden = false;
-    goBtn.focus();
+    push({});
+    (room ? startAllBtn : goBtn).focus();
   }
 
   function pointerTo(e) {
     var r = cv.getBoundingClientRect();
     target.x = (e.clientX - r.left) * (W / r.width);
     target.y = (e.clientY - r.top) * (H / r.height);
-    pointerSeen = true;
   }
   cv.addEventListener('pointermove', pointerTo);
-  cv.addEventListener('pointerdown', function (e) { pointerTo(e); });
+  cv.addEventListener('pointerdown', pointerTo);
 
   window.addEventListener('keydown', function (e) {
+    var tg = e.target && e.target.tagName;
+    if (tg === 'INPUT' || tg === 'TEXTAREA') return;
     var k = e.key.toLowerCase();
     if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'w', 'a', 's', 'd'].indexOf(k) >= 0) {
       keys[k] = true;
       if (state === 'play') e.preventDefault();
     }
-    if ((k === ' ' || k === 'enter') && state !== 'play' && document.activeElement !== goBtn) {
-      e.preventDefault();
-      start();
-    }
+    if (k === 'e') useBoost();
+    if (k === '1') useMagnet();
+    if ((k === ' ' || k === 'enter') && state !== 'play' && !room && document.activeElement !== goBtn && !roomRoot) { e.preventDefault(); start(); }
   });
   window.addEventListener('keyup', function (e) { keys[e.key.toLowerCase()] = false; });
   goBtn.addEventListener('click', start);
+  nitroBtn.addEventListener('click', function () { useBoost(); nitroBtn.blur(); });
+  magBtn.addEventListener('click', function () { useMagnet(); magBtn.blur(); });
 
   function update(dt) {
     elapsed += dt;
+    var L = level;
+    if (boost > 0) { boost -= dt; if (boost <= 0) { boost = 0; cool = 10; } }
+    else if (cool > 0) cool = Math.max(0, cool - dt);
+    var sp = boost > 0 ? 1.2 : 1;
+    if (magnet > 0) magnet = Math.max(0, magnet - dt);
 
     var kx = (keys.arrowright || keys.d ? 1 : 0) - (keys.arrowleft || keys.a ? 1 : 0);
     var ky = (keys.arrowdown || keys.s ? 1 : 0) - (keys.arrowup || keys.w ? 1 : 0);
     if (kx || ky) {
-      var m = Math.sqrt(kx * kx + ky * ky);
-      target.x = p.x + (kx / m) * 60;
-      target.y = p.y + (ky / m) * 60;
+      var m = Math.hypot(kx, ky);
+      target.x = p.x + (kx / m) * 60 * sp; target.y = p.y + (ky / m) * 60 * sp;
     }
-    target.x = Math.max(14, Math.min(W - 14, target.x));
-    target.y = Math.max(14, Math.min(H - 14, target.y));
-    var f = Math.min(1, dt * 6);
-    var ox = p.x;
-    p.x += (target.x - p.x) * f;
-    p.y += (target.y - p.y) * f;
+    target.x = clamp(target.x, 14, W - 14); target.y = clamp(target.y, 14, H - 14);
+    var f = Math.min(1, dt * 6 * sp), ox = p.x;
+    p.x += (target.x - p.x) * f; p.y += (target.y - p.y) * f;
     p.vx = (p.x - ox) / Math.max(dt, 0.001);
 
-    glow -= dt * (0.05 + Math.min(elapsed, 120) * 0.0006);
+    glow -= dt * (0.05 + 0.005 * (L - 1));
 
     spawnOrb -= dt;
-    if (spawnOrb <= 0) { addOrb(); spawnOrb = rand(0.8, 1.5); }
+    if (spawnOrb <= 0) { addOrb(); spawnOrb = rand(0.8, 1.5) * (1 + 0.05 * (L - 1)); }
+
     spawnBat -= dt;
-    if (spawnBat <= 0) { addBat(); spawnBat = Math.max(0.9, 3.2 - elapsed * 0.03) * rand(0.8, 1.2); }
+    if (spawnBat <= 0) {
+      waves++;
+      addBat();
+      if (L >= 6 && Math.random() < 0.25) addBat();
+      spawnBat = Math.max(0.7, 3.2 - 0.26 * (L - 1)) * rand(0.8, 1.2);
+    }
 
     for (var i = orbs.length - 1; i >= 0; i--) {
       var o = orbs[i];
-      o.life -= dt;
-      o.x += o.dx * dt; o.y += o.dy * dt;
+      o.life -= dt; o.x += o.dx * dt; o.y += o.dy * dt;
+      if (magnet > 0) {
+        var md = Math.hypot(p.x - o.x, p.y - o.y);
+        if (md < 150 && md > 1) { o.x += (p.x - o.x) / md * 260 * dt; o.y += (p.y - o.y) / md * 260 * dt; }
+      }
       if (o.x < 20 || o.x > W - 20) o.dx *= -1;
       if (o.y < 20 || o.y > H - 20) o.dy *= -1;
-      var d = Math.hypot(o.x - p.x, o.y - p.y);
-      if (d < 22) {
+      if (Math.hypot(o.x - p.x, o.y - p.y) < 22) {
         orbs.splice(i, 1);
-        pollen += 1;
-        glow = Math.min(1, glow + 0.2);
-        flash = 0.35;
-      } else if (o.life <= 0) {
-        orbs.splice(i, 1);
-      }
+        if (o.rb) { pollen += 5; glow = Math.min(1, glow + 0.5); magnets += 1; flash = 0.7; waveTick(true); }
+        else { pollen += 1; glow = Math.min(1, glow + 0.05); flash = 0.35; }
+        var nl = lvlOf(pollen);
+        if (nl > level) { level = nl; banner = 2; bannerText = null; glow = Math.min(1, glow + 0.3); flash = 0.9; }
+      } else if (o.life <= 0) orbs.splice(i, 1);
     }
 
     for (var j = bats.length - 1; j >= 0; j--) {
       var b = bats[j];
-      b.x += b.dir * b.speed * dt;
-      b.y = b.base + Math.sin(elapsed * b.freq + b.ph) * b.amp;
-      if (b.x < -60 || b.x > W + 60) { bats.splice(j, 1); continue; }
-      if (Math.hypot(b.x - p.x, b.y - p.y) < 22 && state === 'play') { end('bat'); return; }
+      if (b.type === 'sine') {
+        b.x += b.dir * b.speed * dt;
+        b.y = b.base + Math.sin(elapsed * b.freq + b.ph) * b.amp;
+      } else if (b.type === 'dart') {
+        b.x += b.dir * b.speed * dt; b.y += b.slope * dt;
+      } else {
+        var want = Math.atan2(p.y - b.y, p.x - b.x);
+        var diff = Math.atan2(Math.sin(want - b.ang), Math.cos(want - b.ang));
+        b.ang += clamp(diff, -2 * dt, 2 * dt);
+        b.x += Math.cos(b.ang) * b.speed * dt; b.y += Math.sin(b.ang) * b.speed * dt;
+        b.dir = Math.cos(b.ang) >= 0 ? 1 : -1;
+        b.life -= dt;
+        if (b.life <= 0) { bats.splice(j, 1); continue; }
+      }
+      if (b.x < -60 || b.x > W + 60 || b.y < -60 || b.y > H + 60) { bats.splice(j, 1); continue; }
+      if (Math.hypot(b.x - p.x, b.y - p.y) < 22) { die('bat'); return; }
     }
 
-    if (glow <= 0) { glow = 0; end('dark'); }
+    if (glow <= 0) { glow = 0; die('dark'); }
   }
 
   function radius() { return 60 + glow * 150; }
 
-  function drawMoth(x, y, t, vx) {
-    var flap = Math.sin(t * 28) * 0.45 + 0.55;
-    ctx.save();
-    ctx.translate(x, y);
-    ctx.rotate(Math.max(-0.4, Math.min(0.4, vx / 900)));
-    ctx.fillStyle = '#efe4c8';
-    ctx.globalAlpha = 0.92;
-    ctx.beginPath(); ctx.ellipse(-10, -2, 12 * (0.4 + flap * 0.6), 7, -0.5, 0, 6.28); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(10, -2, 12 * (0.4 + flap * 0.6), 7, 0.5, 0, 6.28); ctx.fill();
+  function drawMoth(x, y, t, vx, a, hue) {
+    var flap = Math.sin(t * 28) * 0.45 + 0.55, w = 0.4 + flap * 0.6;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(clamp(vx / 900, -0.4, 0.4));
+    if (hue !== undefined) {
+      ctx.globalAlpha = a * 0.7; ctx.strokeStyle = 'hsl(' + hue + ',85%,70%)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(0, 0, 17, 0, 6.28); ctx.stroke();
+    }
+    ctx.fillStyle = '#efe4c8'; ctx.globalAlpha = a * 0.92;
+    ctx.beginPath(); ctx.ellipse(-10, -2, 12 * w, 7, -0.5, 0, 6.28); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(10, -2, 12 * w, 7, 0.5, 0, 6.28); ctx.fill();
     ctx.fillStyle = '#c9b88f';
-    ctx.beginPath(); ctx.ellipse(-8, 5, 8 * (0.4 + flap * 0.6), 5, 0.4, 0, 6.28); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(8, 5, 8 * (0.4 + flap * 0.6), 5, -0.4, 0, 6.28); ctx.fill();
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = '#4a3b22';
+    ctx.beginPath(); ctx.ellipse(-8, 5, 8 * w, 5, 0.4, 0, 6.28); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(8, 5, 8 * w, 5, -0.4, 0, 6.28); ctx.fill();
+    ctx.globalAlpha = a; ctx.fillStyle = '#4a3b22';
     ctx.beginPath(); ctx.ellipse(0, 1, 2.5, 8, 0, 0, 6.28); ctx.fill();
     ctx.strokeStyle = '#4a3b22'; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(-1, -6); ctx.lineTo(-5, -13); ctx.moveTo(1, -6); ctx.lineTo(5, -13); ctx.stroke();
     ctx.restore();
   }
 
+  var BAT_COL = { sine: '#3a2848', dart: '#5a2f45', hunter: '#2d3f66' };
   function drawBat(b, t, visible) {
-    var flap = Math.sin(t * 14 + b.ph) * 0.5 + 0.5;
-    ctx.save();
-    ctx.translate(b.x, b.y);
-    ctx.scale(b.dir, 1);
-    ctx.globalAlpha = visible;
-    ctx.fillStyle = '#3a2848';
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
+    var flap = Math.sin(t * (b.type === 'dart' ? 20 : 14) + b.ph) * 0.5 + 0.5;
+    ctx.save(); ctx.translate(b.x, b.y); ctx.scale(b.dir, 1);
+    ctx.globalAlpha = visible; ctx.fillStyle = BAT_COL[b.type];
+    ctx.beginPath(); ctx.moveTo(0, 0);
     ctx.quadraticCurveTo(-16, -18 * flap - 4, -30, -4 + 8 * flap);
     ctx.quadraticCurveTo(-20, 2, -14, 4);
     ctx.quadraticCurveTo(-8, 0, 0, 8);
@@ -293,100 +611,214 @@
     ctx.quadraticCurveTo(16, -18 * flap - 4, 0, 0);
     ctx.fill();
     ctx.beginPath(); ctx.ellipse(0, 3, 6, 8, 0, 0, 6.28); ctx.fill();
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = '#ff5a6e';
-    ctx.beginPath(); ctx.arc(-3, 0, 1.6, 0, 6.28); ctx.arc(3, 0, 1.6, 0, 6.28); ctx.fill();
     ctx.restore();
   }
 
-  function draw() {
-    var t = performance.now() / 1000;
-    ctx.fillStyle = '#0a0b1b';
-    ctx.fillRect(0, 0, W, H);
+  // Friends flying right now, smoothed toward their last reported position.
+  function friends(dt) {
+    var out = [], seen = {};
+    others().forEach(function (q) {
+      var pr = q.presence || {};
+      if (pr.st !== 'play' && pr.st !== 'down') return;
+      var tx = pnum(pr.x, null), ty = pnum(pr.y, null);
+      if (tx === null || ty === null) return;
+      var s = rp[q.peer] || (rp[q.peer] = { x: tx, y: ty });
+      var k = Math.min(1, dt * 12);
+      s.vx = (tx - s.x) / Math.max(dt, 0.001) * 0.1;
+      s.x += (tx - s.x) * k; s.y += (ty - s.y) * k;
+      seen[q.peer] = 1;
+      out.push({ x: s.x, y: s.y, vx: s.vx || 0, down: pr.st === 'down', prog: revProg(q.peer), hue: clamp(Math.round(pnum(pr.h, 200)), 0, 360), n: String(pr.n || 'Moth').slice(0, 14) });
+    });
+    for (var id in rp) if (!seen[id]) delete rp[id];
+    return out;
+  }
 
+  function draw(dt) {
+    var t = performance.now() / 1000, R = radius();
+    var fr = friends(dt);
+    ctx.fillStyle = '#0a0b1b'; ctx.fillRect(0, 0, W, H);
     for (var s = 0; s < stars.length; s++) {
       var st = stars[s];
       ctx.globalAlpha = st.a * (0.7 + 0.3 * Math.sin(t * 1.5 + s));
-      ctx.fillStyle = '#cfd2ff';
-      ctx.fillRect(st.x, st.y, st.r, st.r);
+      ctx.fillStyle = '#cfd2ff'; ctx.fillRect(st.x, st.y, st.r, st.r);
     }
     ctx.globalAlpha = 1;
 
-    var R = radius();
-    var inLight = function (x, y) { return Math.hypot(x - p.x, y - p.y) < R; };
+    var inLight = function (x, y) {
+      if (Math.hypot(x - p.x, y - p.y) < R) return true;
+      for (var q = 0; q < fr.length; q++) if (!fr[q].down && Math.hypot(x - fr[q].x, y - fr[q].y) < 55) return true;
+      return false;
+    };
 
     for (var i = 0; i < orbs.length; i++) {
-      var o = orbs[i];
-      var fade = Math.min(1, o.life / 2);
-      var pulse = 0.75 + 0.25 * Math.sin(t * 4 + o.ph);
-      var seen = inLight(o.x, o.y) ? 1 : 0.3;
-      ctx.globalAlpha = seen * fade;
-      var g = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, 18);
-      g.addColorStop(0, 'rgba(255,207,110,' + pulse + ')');
-      g.addColorStop(1, 'rgba(255,207,110,0)');
-      ctx.fillStyle = g;
-      ctx.beginPath(); ctx.arc(o.x, o.y, 18, 0, 6.28); ctx.fill();
-      ctx.fillStyle = '#fff1c4';
-      ctx.beginPath(); ctx.arc(o.x, o.y, 3.2, 0, 6.28); ctx.fill();
+      var o = orbs[i], fade = Math.min(1, o.life / 2), pulse = 0.75 + 0.25 * Math.sin(t * 4 + o.ph);
+      ctx.globalAlpha = (inLight(o.x, o.y) ? 1 : 0.3) * fade;
+      var rad = o.rb ? 28 : 18, hue = Math.floor((t * 240 + o.ph * 60) % 360);
+      var c0 = o.rb ? 'hsla(' + hue + ',100%,65%,' : 'rgba(255,207,110,';
+      var g = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, rad);
+      g.addColorStop(0, c0 + pulse + ')'); g.addColorStop(1, c0 + '0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(o.x, o.y, rad, 0, 6.28); ctx.fill();
+      ctx.fillStyle = o.rb ? 'hsl(' + ((hue + 120) % 360) + ',100%,85%)' : '#fff1c4';
+      ctx.beginPath(); ctx.arc(o.x, o.y, o.rb ? 5 : 3.2, 0, 6.28); ctx.fill();
     }
     ctx.globalAlpha = 1;
 
-    for (var j = 0; j < bats.length; j++) {
-      var b = bats[j];
-      drawBat(b, t, inLight(b.x, b.y) ? 1 : 0.07);
-    }
+    for (var j = 0; j < bats.length; j++) drawBat(bats[j], t, inLight(bats[j].x, bats[j].y) ? 1 : 0.07);
 
     dctx.globalCompositeOperation = 'source-over';
     dctx.clearRect(0, 0, W, H);
-    dctx.fillStyle = 'rgba(5,6,16,0.88)';
-    dctx.fillRect(0, 0, W, H);
+    dctx.fillStyle = 'rgba(5,6,16,0.88)'; dctx.fillRect(0, 0, W, H);
     dctx.globalCompositeOperation = 'destination-out';
-    var lg = dctx.createRadialGradient(p.x, p.y, R * 0.15, p.x, p.y, R);
-    lg.addColorStop(0, 'rgba(0,0,0,1)');
-    lg.addColorStop(0.7, 'rgba(0,0,0,0.8)');
-    lg.addColorStop(1, 'rgba(0,0,0,0)');
-    dctx.fillStyle = lg;
-    dctx.beginPath(); dctx.arc(p.x, p.y, R, 0, 6.28); dctx.fill();
+    var hole = function (x, y, r) {
+      var lg = dctx.createRadialGradient(x, y, r * 0.15, x, y, r);
+      lg.addColorStop(0, 'rgba(0,0,0,1)'); lg.addColorStop(0.7, 'rgba(0,0,0,0.8)'); lg.addColorStop(1, 'rgba(0,0,0,0)');
+      dctx.fillStyle = lg; dctx.beginPath(); dctx.arc(x, y, r, 0, 6.28); dctx.fill();
+    };
+    hole(p.x, p.y, R);
+    for (var h = 0; h < fr.length; h++) if (!fr[h].down) hole(fr[h].x, fr[h].y, 55);
     ctx.drawImage(dark, 0, 0);
 
     var wg = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, R);
-    wg.addColorStop(0, 'rgba(255,207,110,' + (0.16 + flash * 0.25) + ')');
-    wg.addColorStop(1, 'rgba(255,207,110,0)');
-    ctx.fillStyle = wg;
-    ctx.beginPath(); ctx.arc(p.x, p.y, R, 0, 6.28); ctx.fill();
+    wg.addColorStop(0, 'rgba(255,207,110,' + (0.16 + flash * 0.25) + ')'); wg.addColorStop(1, 'rgba(255,207,110,0)');
+    ctx.fillStyle = wg; ctx.beginPath(); ctx.arc(p.x, p.y, R, 0, 6.28); ctx.fill();
 
-    drawMoth(p.x, p.y, t, p.vx);
+    ctx.textAlign = 'center'; ctx.font = '11px "DM Mono", monospace';
+    for (var f2 = 0; f2 < fr.length; f2++) {
+      drawMoth(fr[f2].x, fr[f2].y, t + f2, fr[f2].vx, fr[f2].down ? 0.3 : 0.85, fr[f2].hue);
+      ctx.globalAlpha = 0.9; ctx.fillStyle = 'hsl(' + fr[f2].hue + ',85%,78%)';
+      ctx.fillText(fr[f2].n + (fr[f2].down ? ' · down ' + fr[f2].prog + '/10' : ''), fr[f2].x, fr[f2].y - 24); ctx.globalAlpha = 1;
+    }
+
+    drawMoth(p.x, p.y, t, p.vx, state === 'down' ? 0.3 : 1, room ? myHue : undefined);
+    if (magnet > 0) {
+      ctx.strokeStyle = 'rgba(197,139,255,' + (0.3 + 0.15 * Math.sin(t * 8)) + ')'; ctx.lineWidth = 2;
+      ctx.setLineDash([6, 6]); ctx.beginPath(); ctx.arc(p.x, p.y, 150, 0, 6.28); ctx.stroke(); ctx.setLineDash([]);
+    }
+    if (boost > 0) {
+      ctx.strokeStyle = 'rgba(110,200,255,0.7)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 20 + 3 * Math.sin(t * 30), 0, 6.28); ctx.stroke();
+    }
 
     for (var k = 0; k < bats.length; k++) {
-      var bb = bats[k];
-      ctx.fillStyle = 'rgba(255,90,110,0.9)';
-      var dir = bb.dir;
-      ctx.beginPath();
-      ctx.arc(bb.x - 3 * dir, bb.y, 1.6, 0, 6.28);
-      ctx.arc(bb.x + 3 * dir, bb.y, 1.6, 0, 6.28);
-      ctx.fill();
+      var bb = bats[k], er = bb.type === 'hunter' ? 2.1 : 1.6;
+      ctx.fillStyle = 'rgba(255,90,110,0.9)'; ctx.beginPath();
+      ctx.arc(bb.x - 3 * bb.dir, bb.y, er, 0, 6.28); ctx.arc(bb.x + 3 * bb.dir, bb.y, er, 0, 6.28); ctx.fill();
+    }
+
+    // Lantern charge at the bottom of the screen: fills with pollen, drains every second.
+    (function () {
+      var cx = W / 2, by = H - 14, lvl = clamp(glow, 0, 1), low = lvl < 0.25;
+      var col = low ? 'rgba(255,90,110,0.95)' : 'rgba(255,207,110,0.95)';
+      var lx = cx - 136, ly = by - 46, bx = cx - 100, bw = 190, bh = 12, byy = by - 34;
+      var rr = function (x, y, w, h, r) {
+        r = Math.min(r, w / 2, h / 2);
+        ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+      };
+      ctx.save();
+      ctx.fillStyle = 'rgba(8,9,22,0.72)'; rr(cx - 150, by - 50, 300, 44, 10); ctx.fill();
+      ctx.strokeStyle = '#8c8aa8'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(lx + 11, ly + 8, 6, Math.PI, 0); ctx.stroke();
+      ctx.fillStyle = '#8c8aa8'; ctx.fillRect(lx + 2, ly + 9, 18, 4);
+      ctx.fillStyle = 'rgba(255,255,255,0.06)'; ctx.fillRect(lx + 3, ly + 13, 16, 20);
+      var fh = 20 * lvl;
+      ctx.fillStyle = col; ctx.fillRect(lx + 3, ly + 33 - fh, 16, fh);
+      if (lvl > 0.02) {
+        var fl = (2 + 3 * lvl) * (0.9 + 0.1 * Math.sin(performance.now() / 80));
+        ctx.fillStyle = '#fff1c4'; ctx.beginPath(); ctx.ellipse(lx + 11, ly + 28, fl * 0.7, fl, 0, 0, 6.28); ctx.fill();
+      }
+      ctx.strokeStyle = '#8c8aa8'; ctx.lineWidth = 1.5; ctx.strokeRect(lx + 3, ly + 13, 16, 20);
+      ctx.fillStyle = '#8c8aa8'; ctx.fillRect(lx + 2, ly + 33, 18, 4);
+      ctx.fillStyle = '#262a47'; rr(bx, byy, bw, bh, 6); ctx.fill();
+      if (lvl > 0.01) {
+        ctx.fillStyle = col; rr(bx, byy, Math.max(bh, bw * lvl), bh, 6); ctx.fill();
+        if (flash > 0) { ctx.fillStyle = 'rgba(255,255,255,' + Math.min(0.5, flash * 0.6) + ')'; rr(bx, byy, Math.max(bh, bw * lvl), bh, 6); ctx.fill(); }
+      }
+      ctx.textAlign = 'left'; ctx.fillStyle = '#8c8aa8'; ctx.font = '10px "DM Mono", monospace';
+      ctx.fillText('Lantern', bx, byy - 4);
+      ctx.fillStyle = '#e9e6f5'; ctx.font = '12px "DM Mono", monospace';
+      ctx.fillText(Math.round(lvl * 100) + '%', bx + bw + 8, byy + 10);
+      ctx.restore();
+      ctx.textAlign = 'center';
+    })();
+
+    if (state === 'down') {
+      ctx.textAlign = 'center'; ctx.fillStyle = '#ff9aa8';
+      ctx.font = '800 26px "Bricolage Grotesque", system-ui, sans-serif';
+      ctx.fillText("You're down", W / 2, 60);
+      ctx.font = '14px "DM Mono", monospace'; ctx.fillStyle = '#e9e6f5';
+      ctx.fillText('Revive: ' + reviveN + '/10 rainbow pollen from a teammate', W / 2, 86);
+    }
+    if (banner > 0 && state === 'play') {
+      ctx.globalAlpha = Math.min(1, banner);
+      ctx.fillStyle = '#6ee79a'; ctx.textAlign = 'center';
+      ctx.font = '800 34px "Bricolage Grotesque", system-ui, sans-serif';
+      ctx.fillText(bannerText || ('Level ' + level), W / 2, 62);
+      ctx.globalAlpha = 1;
     }
   }
 
-  function hud() {
-    elScore.textContent = pollen;
-    elTime.textContent = elapsed.toFixed(1);
-    elFill.style.width = Math.max(0, glow * 100) + '%';
-    elMeter.className = 'meter' + (glow < 0.25 ? ' low' : '');
+  function renderBoard() {
+    elBoard.textContent = '';
+    if (!room) return;
+    var rows = room.peers().map(function (q) {
+      var pr = q.presence || {};
+      return { me: q.isMe, n: String(pr.n || 'Moth').slice(0, 14), h: clamp(Math.round(pnum(pr.h, 200)), 0, 360), lv: pnum(pr.lv, 1), pl: q.isMe ? pollen : pnum(pr.pl, 0), st: pr.st };
+    });
+    rows.sort(function (a, b) { return b.pl - a.pl; });
+    rows.forEach(function (r) {
+      var li = document.createElement('li'), d = document.createElement('i');
+      d.className = 'dot'; d.style.background = 'hsl(' + r.h + ',85%,70%)';
+      li.className = r.me ? 'me' : '';
+      li.appendChild(d);
+      li.appendChild(document.createTextNode(r.n + (r.me ? ' (you)' : '') + ' · Lv ' + r.lv + ' · ' + r.pl + (r.st === 'play' ? '' : (r.st === 'down' ? ' (down)' : ' (out)'))));
+      elBoard.appendChild(li);
+    });
   }
 
-  var last = performance.now();
+  function hud(now) {
+    elLevel.textContent = level;
+    elWave.textContent = waves;
+    elScore.textContent = pollen;
+    elFill.style.width = Math.max(0, glow * 100) + '%';
+    elMeter.className = 'meter' + (glow < 0.25 ? ' low' : '');
+    var into = level >= MAX_LEVEL ? PER_LEVEL : pollen - (level - 1) * PER_LEVEL;
+    elLvlFill.style.width = (into / PER_LEVEL * 100) + '%';
+    elLvlText.textContent = level >= MAX_LEVEL ? 'Max' : into + '/' + PER_LEVEL;
+    var nm = $('nitroMeter');
+    if (boost > 0) { elNitro.style.width = (boost / 4 * 100) + '%'; nm.className = 'meter nitro'; }
+    else if (cool > 0) { elNitro.style.width = ((1 - cool / 10) * 100) + '%'; nm.className = 'meter cool'; }
+    else { elNitro.style.width = '100%'; nm.className = 'meter nitro'; }
+    elMag.style.width = (magnet / 6 * 100) + '%';
+    magBtn.textContent = 'Magnet ×' + magnets + ' (1)';
+    var rr = $('revRow'), dn = (room && state === 'play') ? others().filter(function (q) { return q.presence && q.presence.st === 'down'; }) : [];
+    if (dn.length) {
+      var tg2 = null;
+      for (var di = 0; di < dn.length; di++) if (dn[di].peer === revTarget) tg2 = dn[di];
+      var rn = tg2 ? revCnt : 0;
+      rr.hidden = false;
+      $('revFill').style.width = Math.min(100, rn / 10 * 100) + '%';
+      $('revText').textContent = String((tg2 || dn[0]).presence.n || 'Moth').slice(0, 14) + ' ' + Math.min(10, rn) + '/10';
+    } else {
+      rr.hidden = true;
+      if (revTarget) { revTarget = null; revCnt = 0; push({ rp: null }); }
+    }
+    if (room && now - lastBoard > 300) { lastBoard = now; renderBoard(); }
+  }
+
   function frame(now) {
     var dt = Math.min(0.05, (now - last) / 1000);
     last = now;
     if (state === 'play') update(dt);
     if (flash > 0) flash = Math.max(0, flash - dt * 1.5);
-    draw();
-    hud();
+    if (banner > 0) banner = Math.max(0, banner - dt);
+    if (room && state === 'play' && now - lastPres > 100) { lastPres = now; push({}); }
+    draw(dt); hud(now);
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
 })();
 </script>
+</body></html>
 
 </body></html>
