@@ -1,0 +1,6 @@
+{
+  "name": "moth-light",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Moth Light, a night game with up to four players per room. Static page plus one serverless function."
+}
